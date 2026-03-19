@@ -1,4 +1,3 @@
-// server.js
 const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
@@ -6,7 +5,11 @@ const env = require('./src/config/env');
 const { logger, morganMiddleware } = require('./src/utils/logger');
 const { connectDB } = require('./src/config/database');
 const { connectRedis } = require('./src/config/redis');
+
+// Routes
 const healthRoutes = require('./src/routes/health.routes');
+const userRoutes = require('./src/routes/user.routes');
+const apiKeyRoutes = require('./src/routes/apikey.routes');
 
 const app = express();
 
@@ -19,6 +22,8 @@ app.use(morganMiddleware);
 
 // ─── Routes ───────────────────────────────────────────────────────────────────
 app.use('/', healthRoutes);
+app.use('/api/v1/users', userRoutes);
+app.use('/api/v1/users/:userId/keys', apiKeyRoutes);
 
 // ─── 404 Handler ─────────────────────────────────────────────────────────────
 app.use((req, res) => {
