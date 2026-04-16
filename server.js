@@ -10,6 +10,7 @@ const { connectRedis } = require('./src/config/redis');
 const healthRoutes = require('./src/routes/health.routes');
 const userRoutes = require('./src/routes/user.routes');
 const apiKeyRoutes = require('./src/routes/apikey.routes');
+const rateLimitRoutes = require('./src/routes/ratelimit.routes');
 
 const app = express();
 
@@ -24,6 +25,8 @@ app.use(morganMiddleware);
 app.use('/', healthRoutes);
 app.use('/api/v1/users', userRoutes);
 app.use('/api/v1/users/:userId/keys', apiKeyRoutes);
+app.use('/api/v1/configs', rateLimitRoutes);
+
 
 // ─── 404 Handler ─────────────────────────────────────────────────────────────
 app.use((req, res) => {
