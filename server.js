@@ -1,3 +1,4 @@
+// server.js
 const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
@@ -6,29 +7,26 @@ const { logger, morganMiddleware } = require('./src/utils/logger');
 const { connectDB } = require('./src/config/database');
 const { connectRedis } = require('./src/config/redis');
 
-// Routes
 const healthRoutes = require('./src/routes/health.routes');
 const userRoutes = require('./src/routes/user.routes');
 const apiKeyRoutes = require('./src/routes/apikey.routes');
 const rateLimitRoutes = require('./src/routes/ratelimit.routes');
+const protectedRoutes = require('./src/routes/protected.routes');
 
 const app = express();
 
-// ─── Global Middleware ────────────────────────────────────────────────────────
 app.use(helmet());
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(morganMiddleware);
 
-// ─── Routes ───────────────────────────────────────────────────────────────────
 app.use('/', healthRoutes);
 app.use('/api/v1/users', userRoutes);
 app.use('/api/v1/users/:userId/keys', apiKeyRoutes);
 app.use('/api/v1/configs', rateLimitRoutes);
+app.use('/api/v1/protected', protectedRoutes);
 
-
-// ─── 404 Handler ─────────────────────────────────────────────────────────────
 app.use((req, res) => {
   res.status(404).json({
     success: false,
@@ -37,7 +35,6 @@ app.use((req, res) => {
   });
 });
 
-// ─── Global Error Handler ─────────────────────────────────────────────────────
 app.use((err, req, res, next) => {
   logger.error('Unhandled error:', err.message);
   res.status(err.status || 500).json({
@@ -47,7 +44,6 @@ app.use((err, req, res, next) => {
   });
 });
 
-// ─── Start Server ─────────────────────────────────────────────────────────────
 const startServer = async () => {
   const dbConnected = await connectDB();
   const redisConnected = await connectRedis();
