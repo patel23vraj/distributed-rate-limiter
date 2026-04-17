@@ -12,6 +12,7 @@ const userRoutes = require('./src/routes/user.routes');
 const apiKeyRoutes = require('./src/routes/apikey.routes');
 const rateLimitRoutes = require('./src/routes/ratelimit.routes');
 const protectedRoutes = require('./src/routes/protected.routes');
+const metricsRoutes = require('./src/routes/metrics.routes');
 
 const app = express();
 
@@ -26,6 +27,7 @@ app.use('/api/v1/users', userRoutes);
 app.use('/api/v1/users/:userId/keys', apiKeyRoutes);
 app.use('/api/v1/configs', rateLimitRoutes);
 app.use('/api/v1/protected', protectedRoutes);
+app.use('/api/v1/metrics', metricsRoutes);
 
 app.use((req, res) => {
   res.status(404).json({
