@@ -2,10 +2,12 @@
 const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
+const swaggerUi = require('swagger-ui-express');
 const env = require('./src/config/env');
 const { logger, morganMiddleware } = require('./src/utils/logger');
 const { connectDB } = require('./src/config/database');
 const { connectRedis } = require('./src/config/redis');
+const swaggerSpec = require('./src/config/swagger');
 
 const healthRoutes = require('./src/routes/health.routes');
 const userRoutes = require('./src/routes/user.routes');
@@ -16,11 +18,23 @@ const metricsRoutes = require('./src/routes/metrics.routes');
 
 const app = express();
 
-app.use(helmet());
+app.use(helmet({ contentSecurityPolicy: false }));
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(morganMiddleware);
+
+// Swagger UI
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec, {
+  customSiteTitle: 'Rate Limiter API Docs',
+  customCss: '.swagger-ui .topbar { display: none }',
+}));
+
+// Expose raw swagger JSON
+app.get('/api-docs.json', (req, res) => {
+  res.setHeader('Content-Type', 'application/json');
+  res.send(swaggerSpec);
+});
 
 app.use('/', healthRoutes);
 app.use('/api/v1/users', userRoutes);
@@ -55,7 +69,7 @@ const startServer = async () => {
 
   const server = app.listen(env.port, () => {
     logger.info(`Server running on port ${env.port} in ${env.nodeEnv} mode`);
-    logger.info(`Health check: http://localhost:${env.port}/health`);
+    logger.info(`API Docs: http://localhost:${env.port}/api-docs`);
   });
 
   const shutdown = async (signal) => {
