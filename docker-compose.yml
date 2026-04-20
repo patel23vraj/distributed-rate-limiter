@@ -11,7 +11,7 @@ services:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
-      - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql
+      - ./src/config/init.sql:/docker-entrypoint-initdb.d/init.sql
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres"]
       interval: 10s
@@ -32,6 +32,29 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+
+  app:
+    build: .
+    container_name: rate_limiter_app
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: rate_limiter_db
+      DB_USER: postgres
+      DB_PASSWORD: postgres123
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      API_VERSION: v1
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
 
 volumes:
   postgres_data:

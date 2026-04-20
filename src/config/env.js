@@ -10,7 +10,7 @@ const env = {
     port: parseInt(process.env.DB_PORT) || 5432,
     name: process.env.DB_NAME || 'rate_limiter_db',
     user: process.env.DB_USER || 'postgres',
-    password: process.env.DB_PASSWORD || '',
+    password: process.env.DB_PASSWORD || 'postgres123',
   },
 
   redis: {
